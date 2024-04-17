@@ -42,7 +42,6 @@ ________________
 ```bash
 conda create -n powerpaint python=3.10 -y
 conda activate powerpaint
-pip install -r requirements.txt
 conda install pytorch==2.1.2 torchvision==0.16.2 torchaudio==2.1.2 pytorch-cuda=12.1 -c pytorch -c nvidia
 pip install openmim
 pip install mmcv==2.1.0 -f https://download.openmmlab.com/mmcv/dist/cu121/torch2.1/index.html
@@ -50,6 +49,7 @@ pip install chardet
 mim install mmengine
 mim install mmagic
 pip install peft
+pip install -r requirements.txt
 ```
 ## PowerPaint v2
 
