@@ -1,7 +1,7 @@
 import random
 
 import cv2
-import gradio as gr
+# import gradio as gr
 import numpy as np
 import torch
 from controlnet_aux import HEDdetector, OpenposeDetector
@@ -18,17 +18,17 @@ from diffusers import UniPCMultistepScheduler
 from pipeline.pipeline_PowerPaint_Brushnet_CA import StableDiffusionPowerPaintBrushNetPipeline
 import os
 
-base_path = './PowerPaint_v2'
-os.system('apt install git')
-os.system('apt install git-lfs')
-os.system(f'git lfs clone https://code.openxlab.org.cn/zhuangjunhao/PowerPaint_v2.git {base_path}')
-os.system(f'cd {base_path} && git lfs pull')
-os.system(f'cd ..')
+#base_path = './PowerPaint_v2'
+#os.system('apt install git')
+#os.system('apt install git-lfs')
+#os.system(f'git lfs clone https://code.openxlab.org.cn/zhuangjunhao/PowerPaint_v2.git {base_path}')
+#os.system(f'cd {base_path} && git lfs pull')
+#os.system(f'cd ..')
 torch.set_grad_enabled(False)
 context_prompt = ""
 context_negative_prompt = ""
 base_model_path = "./PowerPaint_v2/realisticVisionV60B1_v51VAE/"
-dtype = torch.float16
+dtype = torch.bfloat16
 unet = UNet2DConditionModel.from_pretrained(
         "runwayml/stable-diffusion-v1-5", subfolder="unet", revision=None,torch_dtype=dtype
     )
@@ -56,8 +56,8 @@ load_model(pipe.brushnet, "./PowerPaint_v2/PowerPaint_Brushnet/diffusion_pytorch
 pipe.text_encoder_brushnet.load_state_dict(torch.load("./PowerPaint_v2/PowerPaint_Brushnet/pytorch_model.bin"), strict=False)
 
 pipe.scheduler = UniPCMultistepScheduler.from_config(pipe.scheduler.config)
-
-pipe.enable_model_cpu_offload()
+pipe.to("cuda")
+#pipe.enable_model_cpu_offload()
 global current_control
 current_control = 'canny'
 # controlnet_conditioning_scale = 0.8
@@ -244,162 +244,162 @@ def infer(input_image, text_guided_prompt, text_guided_negative_prompt,
                        seed, negative_prompt, task,None,None)
 
 
-def select_tab_text_guided():
-    return 'text-guided'
+# def select_tab_text_guided():
+#     return 'text-guided'
 
 
-def select_tab_object_removal():
-    return 'object-removal'
+# def select_tab_object_removal():
+#     return 'object-removal'
 
-def select_tab_context_aware():
-    return 'context-aware'
+# def select_tab_context_aware():
+#     return 'context-aware'
 
-def select_tab_image_outpainting():
-    return 'image-outpainting'
-
-
-def select_tab_shape_guided():
-    return 'shape-guided'
+# def select_tab_image_outpainting():
+#     return 'image-outpainting'
 
 
-with gr.Blocks(css='style.css') as demo:
-    with gr.Row():
-        gr.Markdown(
-            "<div align='center'><font size='18'>PowerPaint: High-Quality Versatile Image Inpainting</font></div>"  # noqa
-        )
-    with gr.Row():
-        gr.Markdown(
-            "<div align='center'><font size='5'><a href='https://powerpaint.github.io/'>Project Page</a> &ensp;"  # noqa
-            "<a href='https://arxiv.org/abs/2312.03594/'>Paper</a> &ensp;"
-            "<a href='https://github.com/zhuang2002/PowerPaint'>Code</a> </font></div>"  # noqa
-        )
-    with gr.Row():
-        gr.Markdown(
-            "**Note:** Due to network-related factors, the page may experience occasional bugs！ If the inpainting results deviate significantly from expectations, consider toggling between task options to refresh the content."  # noqa
-        )
-# Attention: Due to network-related factors, the page may experience occasional bugs. If the inpainting results deviate significantly from expectations, consider toggling between task options to refresh the content.
-    with gr.Row():
-        with gr.Column():
-            gr.Markdown('### Input image and draw mask')
-            input_image = gr.Image(source='upload', tool='sketch', type='pil')
+# def select_tab_shape_guided():
+#     return 'shape-guided'
 
-            task = gr.Radio(['text-guided', 'object-removal', 'shape-guided', 'image-outpainting'],
-                            show_label=False,
-                            visible=False)
 
-            # Text-guided object inpainting
-            with gr.Tab('Text-guided object inpainting') as tab_text_guided:
-                enable_text_guided = gr.Checkbox(
-                    label='Enable text-guided object inpainting',
-                    value=True,
-                    interactive=False)
-                text_guided_prompt = gr.Textbox(label='Prompt')
-                text_guided_negative_prompt = gr.Textbox(
-                    label='negative_prompt')
-            tab_text_guided.select(
-                fn=select_tab_text_guided, inputs=None, outputs=task)
+# with gr.Blocks(css='style.css') as demo:
+#     with gr.Row():
+#         gr.Markdown(
+#             "<div align='center'><font size='18'>PowerPaint: High-Quality Versatile Image Inpainting</font></div>"  # noqa
+#         )
+#     with gr.Row():
+#         gr.Markdown(
+#             "<div align='center'><font size='5'><a href='https://powerpaint.github.io/'>Project Page</a> &ensp;"  # noqa
+#             "<a href='https://arxiv.org/abs/2312.03594/'>Paper</a> &ensp;"
+#             "<a href='https://github.com/zhuang2002/PowerPaint'>Code</a> </font></div>"  # noqa
+#         )
+#     with gr.Row():
+#         gr.Markdown(
+#             "**Note:** Due to network-related factors, the page may experience occasional bugs！ If the inpainting results deviate significantly from expectations, consider toggling between task options to refresh the content."  # noqa
+#         )
+# # Attention: Due to network-related factors, the page may experience occasional bugs. If the inpainting results deviate significantly from expectations, consider toggling between task options to refresh the content.
+#     with gr.Row():
+#         with gr.Column():
+#             gr.Markdown('### Input image and draw mask')
+#             input_image = gr.Image(source='upload', tool='sketch', type='pil')
 
-            # Object removal inpainting
-            with gr.Tab('Object removal inpainting') as tab_object_removal:
-                enable_object_removal = gr.Checkbox(
-                    label='Enable object removal inpainting',
-                    value=True,
-                    info='The recommended configuration for the Guidance Scale is 10 or higher. \
-                    If undesired objects appear in the masked area, \
-                    you can address this by specifically increasing the Guidance Scale.',
-                    interactive=False)
-                removal_prompt = gr.Textbox(label='Prompt')
-                removal_negative_prompt = gr.Textbox(
-                    label='negative_prompt')
-                context_prompt = removal_prompt
-                context_negative_prompt = removal_negative_prompt
-            tab_object_removal.select(
-                fn=select_tab_object_removal, inputs=None, outputs=task)
+#             task = gr.Radio(['text-guided', 'object-removal', 'shape-guided', 'image-outpainting'],
+#                             show_label=False,
+#                             visible=False)
+
+#             # Text-guided object inpainting
+#             with gr.Tab('Text-guided object inpainting') as tab_text_guided:
+#                 enable_text_guided = gr.Checkbox(
+#                     label='Enable text-guided object inpainting',
+#                     value=True,
+#                     interactive=False)
+#                 text_guided_prompt = gr.Textbox(label='Prompt')
+#                 text_guided_negative_prompt = gr.Textbox(
+#                     label='negative_prompt')
+#             tab_text_guided.select(
+#                 fn=select_tab_text_guided, inputs=None, outputs=task)
+
+#             # Object removal inpainting
+#             with gr.Tab('Object removal inpainting') as tab_object_removal:
+#                 enable_object_removal = gr.Checkbox(
+#                     label='Enable object removal inpainting',
+#                     value=True,
+#                     info='The recommended configuration for the Guidance Scale is 10 or higher. \
+#                     If undesired objects appear in the masked area, \
+#                     you can address this by specifically increasing the Guidance Scale.',
+#                     interactive=False)
+#                 removal_prompt = gr.Textbox(label='Prompt')
+#                 removal_negative_prompt = gr.Textbox(
+#                     label='negative_prompt')
+#                 context_prompt = removal_prompt
+#                 context_negative_prompt = removal_negative_prompt
+#             tab_object_removal.select(
+#                 fn=select_tab_object_removal, inputs=None, outputs=task)
             
-            # Object image outpainting
-            with gr.Tab('Image outpainting') as tab_image_outpainting:
-                enable_object_removal = gr.Checkbox(
-                    label='Enable image outpainting',
-                    value=True,
-                    info='The recommended configuration for the Guidance Scale is 15 or higher. \
-                    If unwanted random objects appear in the extended image region, \
-                        you can enhance the cleanliness of the extension area by increasing the Guidance Scale.',
-                    interactive=False)
-                outpaint_prompt = gr.Textbox(label='Outpainting_prompt')
-                outpaint_negative_prompt = gr.Textbox(
-                    label='Outpainting_negative_prompt')
-                horizontal_expansion_ratio = gr.Slider(
-                    label='horizontal expansion ratio',
-                    minimum=1,
-                    maximum=4,
-                    step=0.05,
-                    value=1,
-                )
-                vertical_expansion_ratio = gr.Slider(
-                    label='vertical expansion ratio',
-                    minimum=1,
-                    maximum=4,
-                    step=0.05,
-                    value=1,
-                )
-            tab_image_outpainting.select(
-                fn=select_tab_image_outpainting, inputs=None, outputs=task)
+#             # Object image outpainting
+#             with gr.Tab('Image outpainting') as tab_image_outpainting:
+#                 enable_object_removal = gr.Checkbox(
+#                     label='Enable image outpainting',
+#                     value=True,
+#                     info='The recommended configuration for the Guidance Scale is 15 or higher. \
+#                     If unwanted random objects appear in the extended image region, \
+#                         you can enhance the cleanliness of the extension area by increasing the Guidance Scale.',
+#                     interactive=False)
+#                 outpaint_prompt = gr.Textbox(label='Outpainting_prompt')
+#                 outpaint_negative_prompt = gr.Textbox(
+#                     label='Outpainting_negative_prompt')
+#                 horizontal_expansion_ratio = gr.Slider(
+#                     label='horizontal expansion ratio',
+#                     minimum=1,
+#                     maximum=4,
+#                     step=0.05,
+#                     value=1,
+#                 )
+#                 vertical_expansion_ratio = gr.Slider(
+#                     label='vertical expansion ratio',
+#                     minimum=1,
+#                     maximum=4,
+#                     step=0.05,
+#                     value=1,
+#                 )
+#             tab_image_outpainting.select(
+#                 fn=select_tab_image_outpainting, inputs=None, outputs=task)
 
-            # Shape-guided object inpainting
-            with gr.Tab('Shape-guided object inpainting') as tab_shape_guided:
-                enable_shape_guided = gr.Checkbox(
-                    label='Enable shape-guided object inpainting',
-                    value=True,
-                    interactive=False)
-                shape_guided_prompt = gr.Textbox(label='shape_guided_prompt')
-                shape_guided_negative_prompt = gr.Textbox(
-                    label='shape_guided_negative_prompt')
-                fitting_degree = gr.Slider(
-                    label='fitting degree',
-                    minimum=0.3,
-                    maximum=1,
-                    step=0.05,
-                    value=1,
-                )
-            tab_shape_guided.select(
-                fn=select_tab_shape_guided, inputs=None, outputs=task)
+#             # Shape-guided object inpainting
+#             with gr.Tab('Shape-guided object inpainting') as tab_shape_guided:
+#                 enable_shape_guided = gr.Checkbox(
+#                     label='Enable shape-guided object inpainting',
+#                     value=True,
+#                     interactive=False)
+#                 shape_guided_prompt = gr.Textbox(label='shape_guided_prompt')
+#                 shape_guided_negative_prompt = gr.Textbox(
+#                     label='shape_guided_negative_prompt')
+#                 fitting_degree = gr.Slider(
+#                     label='fitting degree',
+#                     minimum=0.3,
+#                     maximum=1,
+#                     step=0.05,
+#                     value=1,
+#                 )
+#             tab_shape_guided.select(
+#                 fn=select_tab_shape_guided, inputs=None, outputs=task)
 
-            run_button = gr.Button(label='Run')
-            with gr.Accordion('Advanced options', open=False):
-                ddim_steps = gr.Slider(
-                    label='Steps', minimum=1, maximum=50, value=50, step=1)
-                scale = gr.Slider(
-                    label='Guidance Scale',
-                    minimum=0.1,
-                    maximum=45.0,
-                    value=12,
-                    step=0.1)
-                seed = gr.Slider(
-                    label='Seed',
-                    minimum=0,
-                    maximum=2147483647,
-                    step=1,
-                    randomize=True,
-                )
-        with gr.Column():
-            gr.Markdown('### Inpainting result')
-            inpaint_result = gr.Gallery(
-                label='Generated images', show_label=False, columns=2)
-            gr.Markdown('### Mask')
-            gallery = gr.Gallery(
-                label='Generated masks', show_label=False, columns=2)
+#             run_button = gr.Button(label='Run')
+#             with gr.Accordion('Advanced options', open=False):
+#                 ddim_steps = gr.Slider(
+#                     label='Steps', minimum=1, maximum=50, value=50, step=1)
+#                 scale = gr.Slider(
+#                     label='Guidance Scale',
+#                     minimum=0.1,
+#                     maximum=45.0,
+#                     value=12,
+#                     step=0.1)
+#                 seed = gr.Slider(
+#                     label='Seed',
+#                     minimum=0,
+#                     maximum=2147483647,
+#                     step=1,
+#                     randomize=True,
+#                 )
+#         with gr.Column():
+#             gr.Markdown('### Inpainting result')
+#             inpaint_result = gr.Gallery(
+#                 label='Generated images', show_label=False, columns=2)
+#             gr.Markdown('### Mask')
+#             gallery = gr.Gallery(
+#                 label='Generated masks', show_label=False, columns=2)
 
-    run_button.click(
-        fn=infer,
-        inputs=[
-            input_image, text_guided_prompt, text_guided_negative_prompt,
-            shape_guided_prompt, shape_guided_negative_prompt, fitting_degree,
-            ddim_steps, scale, seed, task,vertical_expansion_ratio,
-            horizontal_expansion_ratio,outpaint_prompt,
-            outpaint_negative_prompt,removal_prompt,removal_negative_prompt,
-            context_prompt,context_negative_prompt
-        ],
-        outputs=[inpaint_result, gallery])
+#     run_button.click(
+#         fn=infer,
+#         inputs=[
+#             input_image, text_guided_prompt, text_guided_negative_prompt,
+#             shape_guided_prompt, shape_guided_negative_prompt, fitting_degree,
+#             ddim_steps, scale, seed, task,vertical_expansion_ratio,
+#             horizontal_expansion_ratio,outpaint_prompt,
+#             outpaint_negative_prompt,removal_prompt,removal_negative_prompt,
+#             context_prompt,context_negative_prompt
+#         ],
+#         outputs=[inpaint_result, gallery])
 
-demo.queue()
-demo.launch(share=False, server_name='0.0.0.0', server_port=7860)
+# demo.queue()
+# demo.launch(share=False, server_name='0.0.0.0', server_port=7860)
