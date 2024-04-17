@@ -37,41 +37,24 @@ This README provides a step-by-step guide to download the repository, set up the
 ________________
 <img src='https://github.com/open-mmlab/mmagic/assets/12782558/acd01391-c73f-4997-aafd-0869aebcc915'/>
 
-## Getting Started
+## Installation
 
 ```bash
-# Clone the Repository
-git clone https://github.com/zhuang2002/PowerPaint.git
-
-# Navigate to the Repository
-cd projects/powerpaint
-
-# Create Virtual Environment with Conda
-conda create --name PowerPaint python=3.9
-conda activate PowerPaint
-
-# Install Dependencies
+conda create -n powerpaint python=3.10 -y
+conda activate powerpaint
 pip install -r requirements.txt
+conda install pytorch==2.1.2 torchvision==0.16.2 torchaudio==2.1.2 pytorch-cuda=12.1 -c pytorch -c nvidia
+pip install openmim
+pip install mmcv==2.1.0 -f https://download.openmmlab.com/mmcv/dist/cu121/torch2.1/index.html
+pip install chardet
+mim install mmengine
+mim install mmagic
+pip install peft
 ```
 ## PowerPaint v2
 
 ```bash
 python gradio_PowerPaint_BrushNet.py
-```
-
-## PowerPaint v1
-
-```bash
-# Create Models Folder
-mkdir models
-
-# Set up Git LFS
-git lfs install
-
-# Clone PowerPaint Model
-git lfs clone https://huggingface.co/JunhaoZhuang/PowerPaint-v1/ ./models
-
-python gradio_PowerPaint.py
 ```
 
 This command will launch the Gradio interface for PowerPaint.
