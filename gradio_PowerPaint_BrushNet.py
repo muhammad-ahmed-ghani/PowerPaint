@@ -7,7 +7,7 @@ import torch
 from controlnet_aux import HEDdetector, OpenposeDetector
 from diffusers.pipelines.controlnet.pipeline_controlnet import ControlNetModel
 from PIL import Image, ImageFilter
-from pipeline.pipeline_PowerPaint import \
+from powerpaint_pipeline.pipeline_PowerPaint import \
     StableDiffusionInpaintPipeline as Pipeline
 from transformers import DPTFeatureExtractor, DPTForDepthEstimation
 from utils.utils import TokenizerWrapper, add_tokens
@@ -15,7 +15,7 @@ from model.diffusers_c.models import ImageProjection,UNet2DConditionModel
 from transformers import CLIPTextModel
 from model.BrushNet_CA import BrushNetModel
 from diffusers import UniPCMultistepScheduler
-from pipeline.pipeline_PowerPaint_Brushnet_CA import StableDiffusionPowerPaintBrushNetPipeline
+from powerpaint_pipeline.pipeline_PowerPaint_Brushnet_CA import StableDiffusionPowerPaintBrushNetPipeline
 import os
 
 #base_path = './PowerPaint_v2'
