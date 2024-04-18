@@ -27,7 +27,8 @@ import os
 torch.set_grad_enabled(False)
 context_prompt = ""
 context_negative_prompt = ""
-base_model_path = "./PowerPaint_v2/realisticVisionV60B1_v51VAE/"
+root_model_dir = os.environ.get("MODEL_DIR", None)
+base_model_path = os.path.join(root_model_dir, "realisticVisionV60B1_v51VAE/")
 dtype = torch.bfloat16
 unet = UNet2DConditionModel.from_pretrained(
         "runwayml/stable-diffusion-v1-5", subfolder="unet", revision=None,torch_dtype=dtype
@@ -51,9 +52,11 @@ add_tokens(
     initialize_tokens=['a', 'a', 'a'],
     num_vectors_per_token=10)
 from safetensors.torch import load_model
-load_model(pipe.brushnet, "./PowerPaint_v2/PowerPaint_Brushnet/diffusion_pytorch_model.safetensors")
+# load_model(pipe.brushnet, "./PowerPaint_v2/PowerPaint_Brushnet/diffusion_pytorch_model.safetensors")
+load_model(pipe.brushnet, os.path.join(base_model_path, "PowerPaint_Brushnet/diffusion_pytorch_model.safetensors"))
 
-pipe.text_encoder_brushnet.load_state_dict(torch.load("./PowerPaint_v2/PowerPaint_Brushnet/pytorch_model.bin"), strict=False)
+# pipe.text_encoder_brushnet.load_state_dict(torch.load("./PowerPaint_v2/PowerPaint_Brushnet/pytorch_model.bin"), strict=False)
+pipe.text_encoder_brushnet.load_state_dict(torch.load(os.path.join(base_model_path, "PowerPaint_Brushnet/pytorch_model.bin")), strict=False)
 
 pipe.scheduler = UniPCMultistepScheduler.from_config(pipe.scheduler.config)
 pipe.to("cuda")
