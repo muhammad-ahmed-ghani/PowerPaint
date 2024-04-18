@@ -27,7 +27,7 @@ import os
 torch.set_grad_enabled(False)
 context_prompt = ""
 context_negative_prompt = ""
-root_model_dir = os.environ.get("MODELS_DIRECTORY", None)
+root_model_dir = os.environ.get("MODEL_DIR", None)
 base_model_path = os.path.join(root_model_dir, "realisticVisionV60B1_v51VAE/")
 dtype = torch.bfloat16
 unet = UNet2DConditionModel.from_pretrained(
