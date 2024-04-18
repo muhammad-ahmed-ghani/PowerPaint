@@ -212,12 +212,39 @@ def predict(input_image, prompt, fitting_degree, ddim_steps, scale, seed,
 
 
 
-def infer(input_image, text_guided_prompt, text_guided_negative_prompt,
-          shape_guided_prompt, shape_guided_negative_prompt, fitting_degree,
-          ddim_steps, scale, seed, task,vertical_expansion_ratio,
-          horizontal_expansion_ratio,outpaint_prompt,
-          outpaint_negative_prompt,removal_prompt,removal_negative_prompt,
-          context_prompt,context_negative_prompt):
+def infer(input_image, text_guided_prompt=None, text_guided_negative_prompt=None,
+          shape_guided_prompt=None, shape_guided_negative_prompt=None, fitting_degree=1.0,
+          ddim_steps=50, scale=12, seed=None, task='text-guided', vertical_expansion_ratio=None,
+          horizontal_expansion_ratio=None, outpaint_prompt=None, outpaint_negative_prompt=None,
+          removal_prompt=None, removal_negative_prompt=None, context_prompt=None,
+          context_negative_prompt=None):
+    """
+    Perform image inpainting based on the specified task.
+
+    Parameters:
+    - input_image (PIL.Image): The input image for inpainting.
+    - text_guided_prompt (str): The prompt for text-guided inpainting. Default: None.
+    - text_guided_negative_prompt (str): The negative prompt for text-guided inpainting. Default: None.
+    - shape_guided_prompt (str): The prompt for shape-guided inpainting. Default: None.
+    - shape_guided_negative_prompt (str): The negative prompt for shape-guided inpainting. Default: None.
+    - fitting_degree (float): The fitting degree for shape-guided inpainting. Default: 1.0.
+    - ddim_steps (int): The number of steps for DDIM optimization. Default: 50.
+    - scale (float): The guidance scale for inpainting. Default: 12.
+    - seed (int): The random seed for inpainting. Default: None.
+    - task (str): The inpainting task: 'text-guided', 'shape-guided', 'object-removal', 'context-aware', or 'image-outpainting'. Default: 'text-guided'.
+    - vertical_expansion_ratio (float): The vertical expansion ratio for image outpainting. Default: None.
+    - horizontal_expansion_ratio (float): The horizontal expansion ratio for image outpainting. Default: None.
+    - outpaint_prompt (str): The prompt for image outpainting. Default: None.
+    - outpaint_negative_prompt (str): The negative prompt for image outpainting. Default: None.
+    - removal_prompt (str): The prompt for object removal inpainting. Default: None.
+    - removal_negative_prompt (str): The negative prompt for object removal inpainting. Default: None.
+    - context_prompt (str): The prompt for context-aware inpainting. Default: None.
+    - context_negative_prompt (str): The negative prompt for context-aware inpainting. Default: None.
+
+    Returns:
+    - PIL.Image: The inpainted image result.
+    """
+    
     if task == 'text-guided':
         prompt = text_guided_prompt
         negative_prompt = text_guided_negative_prompt
