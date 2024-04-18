@@ -53,10 +53,10 @@ add_tokens(
     num_vectors_per_token=10)
 from safetensors.torch import load_model
 # load_model(pipe.brushnet, "./PowerPaint_v2/PowerPaint_Brushnet/diffusion_pytorch_model.safetensors")
-load_model(pipe.brushnet, os.path.join(base_model_path, "PowerPaint_Brushnet/diffusion_pytorch_model.safetensors"))
+load_model(pipe.brushnet, os.path.join(root_model_dir, "PowerPaint_Brushnet/diffusion_pytorch_model.safetensors"))
 
 # pipe.text_encoder_brushnet.load_state_dict(torch.load("./PowerPaint_v2/PowerPaint_Brushnet/pytorch_model.bin"), strict=False)
-pipe.text_encoder_brushnet.load_state_dict(torch.load(os.path.join(base_model_path, "PowerPaint_Brushnet/pytorch_model.bin")), strict=False)
+pipe.text_encoder_brushnet.load_state_dict(torch.load(os.path.join(root_model_dir, "PowerPaint_Brushnet/pytorch_model.bin")), strict=False)
 
 pipe.scheduler = UniPCMultistepScheduler.from_config(pipe.scheduler.config)
 pipe.to("cuda")
