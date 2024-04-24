@@ -213,4 +213,4 @@ def infer(input_image, text_guided_prompt=None, text_guided_negative_prompt=None
         negative_prompt = text_guided_negative_prompt
 
     return predict(input_image, prompt, fitting_degree, ddim_steps, scale,
-                       seed, negative_prompt, task,None,None)
+                       seed, negative_prompt, task)
