@@ -108,50 +108,50 @@ def add_task(control_type):
 
 
 def predict(input_image, prompt, fitting_degree, ddim_steps, scale, seed,
-            negative_prompt, task,vertical_expansion_ratio,horizontal_expansion_ratio):
-    size1, size2 = input_image['image'].convert('RGB').size
+            negative_prompt, task):
+    # size1, size2 = input_image['image'].convert('RGB').size
 
-    if task!='image-outpainting':
-        if size1 < size2:
-            input_image['image'] = input_image['image'].convert('RGB').resize(
-                (640, int(size2 / size1 * 640)))
-        else:
-            input_image['image'] = input_image['image'].convert('RGB').resize(
-                (int(size1 / size2 * 640), 640))
-    else:
-        if size1 < size2:
-            input_image['image'] = input_image['image'].convert('RGB').resize(
-                (512, int(size2 / size1 * 512)))
-        else:
-            input_image['image'] = input_image['image'].convert('RGB').resize(
-                (int(size1 / size2 * 512), 512))
+    # if task!='image-outpainting':
+    #     if size1 < size2:
+    #         input_image['image'] = input_image['image'].convert('RGB').resize(
+    #             (640, int(size2 / size1 * 640)))
+    #     else:
+    #         input_image['image'] = input_image['image'].convert('RGB').resize(
+    #             (int(size1 / size2 * 640), 640))
+    # else:
+    #     if size1 < size2:
+    #         input_image['image'] = input_image['image'].convert('RGB').resize(
+    #             (512, int(size2 / size1 * 512)))
+    #     else:
+    #         input_image['image'] = input_image['image'].convert('RGB').resize(
+    #             (int(size1 / size2 * 512), 512))
 
     if task=='image-outpainting' or task == 'context-aware':
         prompt = prompt + ' empty scene'
     if task=='object-removal':
         prompt = prompt + ' empty scene blur'
         
-    if vertical_expansion_ratio!=None and horizontal_expansion_ratio!=None:
-        o_W,o_H = input_image['image'].convert('RGB').size
-        c_W = int(horizontal_expansion_ratio*o_W)
-        c_H = int(vertical_expansion_ratio*o_H)
+    # if vertical_expansion_ratio!=None and horizontal_expansion_ratio!=None:
+    #     o_W,o_H = input_image['image'].convert('RGB').size
+    #     c_W = int(horizontal_expansion_ratio*o_W)
+    #     c_H = int(vertical_expansion_ratio*o_H)
 
-        expand_img = np.ones((c_H, c_W,3), dtype=np.uint8)*127
-        original_img = np.array(input_image['image'])
-        expand_img[int((c_H-o_H)/2.0):int((c_H-o_H)/2.0)+o_H,int((c_W-o_W)/2.0):int((c_W-o_W)/2.0)+o_W,:] = original_img
+    #     expand_img = np.ones((c_H, c_W,3), dtype=np.uint8)*127
+    #     original_img = np.array(input_image['image'])
+    #     expand_img[int((c_H-o_H)/2.0):int((c_H-o_H)/2.0)+o_H,int((c_W-o_W)/2.0):int((c_W-o_W)/2.0)+o_W,:] = original_img
 
-        blurry_gap = 10
+    #     blurry_gap = 10
 
-        expand_mask = np.ones((c_H, c_W,3), dtype=np.uint8)*255
-        if vertical_expansion_ratio == 1 and horizontal_expansion_ratio!=1:
-            expand_mask[int((c_H-o_H)/2.0):int((c_H-o_H)/2.0)+o_H,int((c_W-o_W)/2.0)+blurry_gap:int((c_W-o_W)/2.0)+o_W-blurry_gap,:] = 0
-        elif vertical_expansion_ratio != 1 and horizontal_expansion_ratio!=1:
-            expand_mask[int((c_H-o_H)/2.0)+blurry_gap:int((c_H-o_H)/2.0)+o_H-blurry_gap,int((c_W-o_W)/2.0)+blurry_gap:int((c_W-o_W)/2.0)+o_W-blurry_gap,:] = 0
-        elif vertical_expansion_ratio != 1 and horizontal_expansion_ratio==1:
-            expand_mask[int((c_H-o_H)/2.0)+blurry_gap:int((c_H-o_H)/2.0)+o_H-blurry_gap,int((c_W-o_W)/2.0):int((c_W-o_W)/2.0)+o_W,:] = 0
+    #     expand_mask = np.ones((c_H, c_W,3), dtype=np.uint8)*255
+    #     if vertical_expansion_ratio == 1 and horizontal_expansion_ratio!=1:
+    #         expand_mask[int((c_H-o_H)/2.0):int((c_H-o_H)/2.0)+o_H,int((c_W-o_W)/2.0)+blurry_gap:int((c_W-o_W)/2.0)+o_W-blurry_gap,:] = 0
+    #     elif vertical_expansion_ratio != 1 and horizontal_expansion_ratio!=1:
+    #         expand_mask[int((c_H-o_H)/2.0)+blurry_gap:int((c_H-o_H)/2.0)+o_H-blurry_gap,int((c_W-o_W)/2.0)+blurry_gap:int((c_W-o_W)/2.0)+o_W-blurry_gap,:] = 0
+    #     elif vertical_expansion_ratio != 1 and horizontal_expansion_ratio==1:
+    #         expand_mask[int((c_H-o_H)/2.0)+blurry_gap:int((c_H-o_H)/2.0)+o_H-blurry_gap,int((c_W-o_W)/2.0):int((c_W-o_W)/2.0)+o_W,:] = 0
         
-        input_image['image'] = Image.fromarray(expand_img)
-        input_image['mask'] = Image.fromarray(expand_mask)
+    #     input_image['image'] = Image.fromarray(expand_img)
+    #     input_image['mask'] = Image.fromarray(expand_mask)
 
         
 
@@ -190,28 +190,28 @@ def predict(input_image, prompt, fitting_degree, ddim_steps, scale, seed,
             width=H,
             height=W,
         ).images[0]
-    mask_np = np.array(input_image['mask'].convert('RGB'))
-    red = np.array(result).astype('float') * 1
-    red[:, :, 0] = 180.0
-    red[:, :, 2] = 0
-    red[:, :, 1] = 0
-    result_m = np.array(result)
-    result_m = Image.fromarray(
-        (result_m.astype('float') * (1 - mask_np.astype('float') / 512.0) +
-         mask_np.astype('float') / 512.0 * red).astype('uint8'))
-    m_img = input_image['mask'].convert('RGB').filter(
-        ImageFilter.GaussianBlur(radius=3))
-    m_img = np.asarray(m_img) / 255.0
-    img_np = np.asarray(input_image['image'].convert('RGB')) / 255.0
-    ours_np = np.asarray(result) / 255.0
-    ours_np = ours_np * m_img + (1 - m_img) * img_np
-    result_paste = Image.fromarray(np.uint8(ours_np * 255))
+    # mask_np = np.array(input_image['mask'].convert('RGB'))
+    # red = np.array(result).astype('float') * 1
+    # red[:, :, 0] = 180.0
+    # red[:, :, 2] = 0
+    # red[:, :, 1] = 0
+    # result_m = np.array(result)
+    # result_m = Image.fromarray(
+    #     (result_m.astype('float') * (1 - mask_np.astype('float') / 512.0) +
+    #      mask_np.astype('float') / 512.0 * red).astype('uint8'))
+    # m_img = input_image['mask'].convert('RGB').filter(
+    #     ImageFilter.GaussianBlur(radius=3))
+    # m_img = np.asarray(m_img) / 255.0
+    # img_np = np.asarray(input_image['image'].convert('RGB')) / 255.0
+    # ours_np = np.asarray(result) / 255.0
+    # ours_np = ours_np * m_img + (1 - m_img) * img_np
+    # result_paste = Image.fromarray(np.uint8(ours_np * 255))
 
-    dict_res = [input_image['mask'].convert('RGB'), result_m]
+    # dict_res = [input_image['mask'].convert('RGB'), result_m]
 
-    dict_out = [result]
+    # dict_out = [result]
 
-    return dict_out, dict_res
+    return result
 
 
 
@@ -264,7 +264,7 @@ def infer(input_image, text_guided_prompt=None, text_guided_negative_prompt=None
         prompt = outpaint_prompt
         negative_prompt = outpaint_negative_prompt
         return predict(input_image, prompt, fitting_degree, ddim_steps, scale,
-                       seed, negative_prompt, task,vertical_expansion_ratio,horizontal_expansion_ratio)
+                       seed, negative_prompt, task)
     else:
         task = 'text-guided'
         prompt = text_guided_prompt
